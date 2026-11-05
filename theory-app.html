@@ -172,7 +172,8 @@ nav.tabs{display:flex;justify-content:space-around;border-top:2px solid var(--li
 .icon-btn svg{width:28px;height:28px}
 .combo{font-family:var(--font-display);font-weight:700;color:var(--amber-d);display:flex;align-items:center;gap:2px;font-size:17px;min-width:44px}
 .combo svg{width:20px;height:20px}
-.ls-body{flex:1;overflow-y:auto;padding-block:6px 20px;display:flex;flex-direction:column;gap:16px}
+.ls-body{flex:1;min-height:0;overflow-y:auto;padding-block:6px 20px;display:flex;flex-direction:column;gap:16px}
+.ls-body>*{flex-shrink:0}
 .ls-meta{display:flex;justify-content:space-between;align-items:center;gap:8px;padding-bottom:12px;border-bottom:2px solid var(--line);font-weight:700;font-size:15px}
 .ls-unit{color:var(--amber-d)}
 .ls-count{color:var(--muted);font-variant-numeric:tabular-nums}
