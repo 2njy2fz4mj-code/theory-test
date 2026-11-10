@@ -1,0 +1,21 @@
+{
+  "name": "theory-bekal",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "תאוריה בקל: לימוד תיאוריה לרישיון B על בסיס המאגר הרשמי",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.0.4",
+    "vite": "^7.3.0",
+    "vite-plugin-pwa": "^1.0.3"
+  }
+}
