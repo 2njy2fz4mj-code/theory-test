@@ -497,7 +497,7 @@ function vPractice(){
     ['wrong','הטעויות שלי',wn?`${wn} שאלות שכדאי לחזור עליהן`:'אין טעויות כרגע. כל הכבוד','--red',IC.redo,!wn],
     ['signs','שאלות עם תמונה',`${signs} שאלות עם תמרור או צילום מצב בדרך`,'--amber',IC.sign,false]
   ];
-  return `<div class="coach"><div class="bubble">בחרו סוג תרגול, ואני אכין לכם סט קצר.<small>רמזי</small></div>${mascot('happy',90)}</div>
+  return `<div class="coach"><div class="bubble">בחרו סוג תרגול, ואני אכין לכם סט קצר.<small>תאוריה בקל</small></div>${mascot('happy',90)}</div>
   <h2 class="section-title">מה תרצו לתרגל?</h2>
   <div class="stack">${modes.map(([k,t,s,c,ic,dis])=>`<button class="mode" data-m="${k}" aria-pressed="${P.mode===k}" ${dis?'disabled':''}><div class="mode-ico" style="color:var(${c});border-color:var(${c})">${ic}</div><div><b>${t}</b><span>${s}</span></div><div class="check-dot">${P.mode===k?IC.check:''}</div></button>`).join('')}</div>
   ${P.mode==='mix'||P.mode==='new'?`<div class="stack"><h3>נושאים</h3><div class="chips">${TOPICS.map((t,i)=>`<button class="chip" data-u="${i}" aria-pressed="${P.topics.has(i)}">${t.title}</button>`).join('')}</div></div>`:''}
@@ -522,7 +522,7 @@ function bPractice(){
 /* ================= EXAMS LIST ================= */
 function vExams(){
   const best=S.exams.reduce((m,e)=>Math.max(m,e.c),0);
-  return `<div class="coach"><div class="bubble">סימולציה כמו במבחן האמיתי: 30 שאלות, 40 דקות, בלי הסברים באמצע.<small>רמזי</small></div>${mascot('happy',90)}</div>
+  return `<div class="coach"><div class="bubble">סימולציה כמו במבחן האמיתי: 30 שאלות, 40 דקות, בלי הסברים באמצע.<small>תאוריה בקל</small></div>${mascot('happy',90)}</div>
   <h2 class="section-title">המבחנים שלי</h2>
   <p class="muted" style="margin:-10px 0 0">עוברים עם 26 תשובות נכונות לפחות. בסוף תראו כל טעות עם הסבר.</p>
   <button class="btn btn-primary" id="newExam">מבחן חדש</button>
