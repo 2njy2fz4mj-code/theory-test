@@ -44,7 +44,7 @@ function ExamPlan() {
 }
 
 export default function PathView() {
-  const { S, seen } = useStore()
+  const { S, act, seen } = useStore()
   const ui = useUI()
 
   let cur = null
@@ -70,8 +70,8 @@ export default function PathView() {
       <div className="ready">
         <Ring p={seen.size / Q.length} />
         <div>
-          <h3>המאגר הרשמי</h3>
-          <p>ראיתם {seen.size} מתוך {Q.length} שאלות · המבחן: 30 שאלות, 40 דקות, עד 4 טעויות</p>
+          <h3>{S.name ? `היי ${S.name}!` : 'ההתקדמות שלכם'}</h3>
+          <p>למדתם {seen.size} מתוך {Q.length} השאלות שבמאגר הרשמי</p>
         </div>
       </div>
       {cur && (
@@ -80,7 +80,19 @@ export default function PathView() {
           <small>{cur.u.title} · {cur.l.title} · {cur.l.type === 'review' ? cur.l.count : cur.l.qs.length} שאלות</small>
         </button>
       )}
+      {S.intro && (
+        <div className="card intro">
+          <h3>איך לומדים כאן?</h3>
+          <ol>
+            <li><b>מסלול</b><span>שיעורים קצרים של 10 שאלות, לפי הסדר. טעיתם? השאלה חוזרת עד שמצליחים.</span></li>
+            <li><b>מכשילות</b><span>השאלות שהכי קל ליפול בהן, עם טיפ ורשימה לשינון.</span></li>
+            <li><b>מבחנים</b><span>סימולציה כמו במבחן האמיתי: 30 שאלות, 40 דקות, עד 4 טעויות.</span></li>
+          </ol>
+          <button className="btn btn-outline" onClick={act.hideIntro}>הבנתי</button>
+        </div>
+      )}
       <ExamPlan />
+      <h2 className="section-title">המסלול</h2>
       {UNITS.map((u, ui2) => {
         const dn = u.lessons.filter((l) => S.done[l.id]).length
         return (

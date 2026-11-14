@@ -325,3 +325,39 @@ button.visual.photo{display:block;position:relative;cursor:zoom-in;font:inherit}
 .ls-foot.stack{gap:10px}
 .fb .note b{font-weight:800}
 .mode > .go-chev{flex:none}
+
+/* ===== clearer layout ===== */
+/* top strip: every number says what it is */
+.top{gap:16px;align-items:flex-start}
+.stat{display:grid;grid-template-columns:auto auto;column-gap:6px;row-gap:1px;align-items:center;justify-content:start}
+.stat small{grid-column:1/-1;font-family:var(--font-body);font-size:11.5px;font-weight:600;color:var(--muted);line-height:1.2;white-space:nowrap}
+.goal{gap:7px;padding-top:3px}
+
+/* the coach sits beside what it says, so the page starts higher */
+.coach{flex-direction:row-reverse;align-items:center;gap:12px}
+.coach .bubble{flex:1;max-width:none;font-size:15.5px}
+.coach .bubble::after{bottom:auto;left:auto;right:-9px;top:50%;transform:translateY(-50%) rotate(-45deg)}
+.coach .mascot{flex:none}
+
+/* home */
+.ready{background:var(--surface);border-color:var(--line);box-shadow:0 4px 0 var(--line)}
+.ready h3{font-size:21px}
+.ready p{font-size:15px}
+.intro{display:flex;flex-direction:column;gap:12px}
+.intro h3{font-size:20px}
+.intro ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px;counter-reset:step}
+.intro li{counter-increment:step;display:grid;grid-template-columns:34px 1fr;column-gap:12px;align-items:start}
+.intro li::before{content:counter(step);grid-row:1/3;width:34px;height:34px;border-radius:50%;background:var(--blue-bg);color:var(--blue);font-family:var(--font-display);font-weight:700;font-size:17px;display:grid;place-items:center}
+.intro li b{font-family:var(--font-display);font-size:17px}
+.intro li span{font-size:15px;color:var(--muted)}
+.plan{background:var(--surface);border:2px solid var(--line);border-inline-start:6px solid var(--amber);box-shadow:0 4px 0 var(--line)}
+.plan b.big{color:var(--ink);font-size:19px}
+.plan .btn{margin-top:4px}
+
+/* lesson: question, answers, then the helpers */
+.ls-q{font-size:22px}
+.ls-body > .tools{justify-content:center;padding-top:2px}
+.tool{background:transparent;box-shadow:none}
+.opt{line-height:1.4}
+.section-title{font-size:21px}
+.view{gap:18px}

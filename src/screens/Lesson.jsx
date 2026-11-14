@@ -170,10 +170,6 @@ export default function Lesson({ cfg, onClose }) {
           </div>
           <Photo q={q} />
           <h1 className="ls-q"><Hl text={q.q} /></h1>
-          <div className="tools">
-            <button className="tool" onClick={readAloud}>{IC.speak}הקראה</button>
-            <button className="tool" onClick={hint} disabled={st.checked || st.removed.length > 0}>{IC.bulb}רמז: מחיקת תשובה</button>
-          </div>
           <div className="opts" role="radiogroup">
             {st.cur.order.map((oi, k) => {
               let cls = 'opt'
@@ -187,6 +183,10 @@ export default function Lesson({ cfg, onClose }) {
                 </button>
               )
             })}
+          </div>
+          <div className="tools">
+            <button className="tool" onClick={readAloud}>{IC.speak}הקראה</button>
+            <button className="tool" onClick={hint} disabled={st.checked || st.removed.length > 0}>{IC.bulb}רמז: מחיקת תשובה</button>
           </div>
         </div>
         <div className="ls-foot gut" style={{ visibility: st.checked ? 'hidden' : 'visible' }}>
