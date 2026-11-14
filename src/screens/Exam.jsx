@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Hl, QBY, optionOrder, pickExam } from '../lib/data.jsx'
-import { dayStr, useStore } from '../lib/store.jsx'
-import { useUI } from '../lib/ui.jsx'
+import { clearExam, dayStr, loadExam, saveExam, useStore } from '../lib/store.jsx'
+import { useBack, useUI } from '../lib/ui.jsx'
 import { confetti, sfx } from '../lib/fx.js'
 import { IC } from '../components/Icons.jsx'
 import { Photo, mmss } from '../components/bits.jsx'
@@ -10,10 +10,13 @@ import Mascot from '../components/Mascot.jsx'
 const LIMIT = 40 * 60
 
 /* Test simulation like the real one: 30 questions, 40 minutes, pass with up to 4 mistakes */
-export default function Exam({ onClose }) {
+export default function Exam({ onClose, resume }) {
   const { act } = useStore()
   const ui = useUI()
   const [ex, setEx] = useState(() => {
+    // a test that was cut off continues with the time it had left
+    const saved = resume ? loadExam() : null
+    if (saved) return { ids: saved.ids, ans: saved.ans, orders: saved.orders, idx: Math.min(saved.idx || 0, saved.ids.length - 1), t0: Date.now() - (saved.used || 0) * 1000 }
     const ids = pickExam(30)
     return { ids, ans: Array(ids.length).fill(null), orders: ids.map((id) => optionOrder(QBY[id])), idx: 0, t0: Date.now() }
   })
@@ -30,8 +33,26 @@ export default function Exam({ onClose }) {
     return () => clearInterval(t)
   }, [result])
 
+  const done = useRef(false)
+  const save = useRef(null)
+  save.current = () => {
+    if (done.current) return
+    saveExam({ ids: ex.ids, ans: ex.ans, orders: ex.orders, idx: ex.idx, used: Math.round((Date.now() - ex.t0) / 1000) })
+  }
+  useEffect(() => { save.current() }, [ex])
+  useEffect(() => {
+    const f = () => save.current()
+    const t = setInterval(f, 15000)
+    document.addEventListener('visibilitychange', f)
+    window.addEventListener('pagehide', f)
+    return () => { clearInterval(t); document.removeEventListener('visibilitychange', f); window.removeEventListener('pagehide', f) }
+  }, [])
+  const quit = () => { done.current = true; clearExam(); onClose() }
+
   const finish = (auto) => {
-    if (result) return
+    if (done.current) return
+    done.current = true
+    clearExam()
     let c = 0
     const mist = []
     const list = ex.ids.map((id, i) => {
@@ -64,8 +85,18 @@ export default function Exam({ onClose }) {
     if (!unanswered) return finish(false)
     ui.confirm({
       title: 'לסיים את המבחן?', text: `נשארו ${unanswered} שאלות בלי תשובה. הן ייספרו כטעויות.`,
-      cancel: 'לחזור לשאלות', ok: 'סיום המבחן', onOk: () => finish(false)
+      cancel: 'לשאלה שלא עניתם עליה', ok: 'סיום המבחן', onOk: () => finish(false),
+      onCancel: () => go(ex.ans.findIndex((a) => a == null))
     })
+  }
+  const askQuit = () => ui.confirm({
+    title: 'לצאת מהמבחן?', text: 'המבחן לא יישמר ולא ייספר.', cancel: 'להמשיך במבחן', ok: 'יציאה', onOk: quit
+  })
+  useBack(() => (result ? onClose() : askQuit()))
+  const redoMistakes = () => {
+    const ids = result.mist.map((m) => m.q.id)
+    onClose()
+    ui.startLesson({ mode: 'practice', label: 'טעויות מהמבחן', ids })
   }
 
   if (result) {
@@ -102,7 +133,10 @@ export default function Exam({ onClose }) {
               <div className="card" style={{ textAlign: 'center' }}><b>אפס טעויות. מושלם!</b></div>
             )}
           </div>
-          <div className="ls-foot gut"><button className="btn btn-primary" onClick={onClose}>חזרה למבחנים</button></div>
+          <div className="ls-foot gut stack">
+            {result.mist.length > 0 && <button className="btn btn-primary" onClick={redoMistakes}>לתרגל את הטעויות עכשיו</button>}
+            <button className={'btn ' + (result.mist.length ? 'btn-outline' : 'btn-primary')} onClick={onClose}>חזרה למבחנים</button>
+          </div>
         </div>
       </div>
     )
@@ -114,10 +148,8 @@ export default function Exam({ onClose }) {
     <div className="sheet-screen">
       <div className="sheet-inner">
         <div className="ls-top gut">
-          <button className="icon-btn" aria-label="יציאה מהמבחן" onClick={() => ui.confirm({
-            title: 'לצאת מהמבחן?', text: 'המבחן לא יישמר ולא ייספר.', cancel: 'להמשיך במבחן', ok: 'יציאה', onOk: onClose
-          })}>{IC.x}</button>
-          <div style={{ flex: 1, fontWeight: 700 }} className="ls-count">שאלה {ex.idx + 1}/{N}</div>
+          <button className="icon-btn" aria-label="יציאה מהמבחן" onClick={askQuit}>{IC.x}</button>
+          <div style={{ flex: 1, fontWeight: 700 }} className="ls-count">שאלה {ex.idx + 1}/{N} · נענו {ex.ans.filter((a) => a != null).length}</div>
           <div className={'timer' + (left < 300 ? ' low' : '')}>{IC.clock}<span>{mmss(left)}</span></div>
         </div>
         <div className="gut">
@@ -142,6 +174,8 @@ export default function Exam({ onClose }) {
         <div className="ls-foot gut ex-nav">
           <button className="btn btn-outline" disabled={ex.idx === 0} onClick={() => go(ex.idx - 1)}>הקודמת</button>
           {ex.idx === N - 1
+            ? <button className="btn btn-green" onClick={askFinish}>סיום המבחן</button>
+            : ex.ans.every((a) => a != null)
             ? <button className="btn btn-green" onClick={askFinish}>סיום המבחן</button>
             : <button className="btn btn-primary" onClick={() => go(ex.idx + 1)}>הבאה</button>}
         </div>

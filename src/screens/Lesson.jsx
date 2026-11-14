@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { Hl, QBY, optionOrder, pickOne, shuffle } from '../lib/data.jsx'
+import { Hl, QBY, TRAP_OF, optionOrder, pickOne, shuffle } from '../lib/data.jsx'
 import { useStore } from '../lib/store.jsx'
-import { useUI } from '../lib/ui.jsx'
+import { useBack, useUI } from '../lib/ui.jsx'
 import { buzz, confetti, sfx, speak, stopSpeaking } from '../lib/fx.js'
 import { IC } from '../components/Icons.jsx'
 import { Photo, mmss } from '../components/bits.jsx'
@@ -50,7 +50,10 @@ export default function Lesson({ cfg, onClose }) {
     }))
   }
 
+  const finished = useRef(false)
   const finish = () => {
+    if (finished.current) return
+    finished.current = true
     const secs = Math.round((Date.now() - t0) / 1000)
     const acc = Math.round(((total - st.wrong.length) / total) * 100)
     const xp = cfg.mode === 'lesson' ? 10 + (st.wrong.length ? 0 : 5) : total
@@ -84,6 +87,11 @@ export default function Lesson({ cfg, onClose }) {
     title: 'לצאת מהשיעור?', text: 'ההתקדמות בשיעור הזה לא תישמר.',
     cancel: 'להמשיך ללמוד', ok: 'יציאה', onOk: onClose
   })
+  useBack(() => (st.result ? onClose() : askClose()))
+  const redoWrong = () => {
+    onClose()
+    ui.startLesson({ mode: 'practice', label: 'חזרה על הטעויות', ids: st.wrong, trap: cfg.trap })
+  }
 
   // keyboard: 1-4 choose, Enter checks / continues
   const keys = useRef(null)
@@ -103,25 +111,47 @@ export default function Lesson({ cfg, onClose }) {
     const r = st.result
     return (
       <div className="sheet-screen">
-        <div className="sheet-inner gut">
-          <div className="done-screen">
-            <div className="bob"><Mascot mood="cheer" size={140} /></div>
-            <h1>{cfg.mode === 'lesson' ? 'השיעור הושלם!' : 'התרגול הושלם!'}</h1>
-            <p className="muted" style={{ margin: 0, fontSize: 17 }}>
-              {r.perfect ? 'בלי אף טעות. מושלם.' : 'כל טעות שתיקנתם היום היא שאלה שתדעו במבחן.'}
-            </p>
-            <div className="done-tiles">
-              <div className="dt" style={{ '--tc': 'var(--amber)' }}><b>XP</b><div dir="ltr">+{r.xp}</div></div>
-              <div className="dt" style={{ '--tc': 'var(--green)' }}><b>דיוק</b><div>{r.acc}%</div></div>
-              <div className="dt" style={{ '--tc': 'var(--blue)' }}><b>זמן</b><div>{mmss(r.secs)}</div></div>
+        <div className="sheet-inner">
+          <div className="ls-body gut">
+            <div className="done-screen">
+              <div className="bob"><Mascot mood="cheer" size={r.perfect ? 140 : 110} /></div>
+              <h1>{cfg.mode === 'lesson' ? 'השיעור הושלם!' : 'התרגול הושלם!'}</h1>
+              <p className="muted" style={{ margin: 0, fontSize: 17 }}>
+                {r.perfect ? 'בלי אף טעות. מושלם.' : 'כל טעות שתיקנתם היום היא שאלה שתדעו במבחן.'}
+              </p>
+              <div className="done-tiles">
+                <div className="dt" style={{ '--tc': 'var(--amber)' }}><b>XP</b><div dir="ltr">+{r.xp}</div></div>
+                <div className="dt" style={{ '--tc': 'var(--green)' }}><b>דיוק</b><div>{r.acc}%</div></div>
+                <div className="dt" style={{ '--tc': 'var(--blue)' }}><b>זמן</b><div>{mmss(r.secs)}</div></div>
+              </div>
             </div>
+            {!r.perfect && (
+              <>
+                <h2 className="section-title">שווה לזכור</h2>
+                {st.wrong.map((id) => {
+                  const w = QBY[id]
+                  return (
+                    <div className="card fact" key={id}>
+                      <div className="q"><Hl text={w.q} /></div>
+                      <div className="ans">{IC.check}<span>{w.o[w.a]}</span></div>
+                      {w.why && <div className="why">{w.why}</div>}
+                    </div>
+                  )
+                })}
+              </>
+            )}
           </div>
-          <div className="foot-pad"><button className="btn btn-primary" autoFocus onClick={onClose}>המשך</button></div>
+          <div className="ls-foot gut stack">
+            <button className="btn btn-primary" autoFocus onClick={onClose}>המשך</button>
+            {!r.perfect && <button className="btn btn-outline" onClick={redoWrong}>לתרגל שוב את {st.wrong.length === 1 ? 'הטעות' : `${st.wrong.length} הטעויות`}</button>}
+          </div>
         </div>
       </div>
     )
   }
 
+  const trap = TRAP_OF[q.id]
+  const tip = !q.why && trap && (cfg.trap || !st.ok) ? trap.short : null
   const again = st.wrong.includes(q.id) && !st.checked
   const n = Math.min(st.solved + (st.checked && st.ok ? 0 : 1), total)
 
@@ -171,6 +201,7 @@ export default function Lesson({ cfg, onClose }) {
               </div>
               {!st.ok && <p>התשובה הנכונה: <b>{q.o[q.a]}</b></p>}
               {q.why ? <p><b>למה?</b> {q.why}</p> : st.ok ? <p>{q.o[q.a]}</p> : null}
+              {tip && <p className="note"><b>טיפ:</b> {tip}</p>}
               {!st.ok && <div className="note">↻ נחזור לשאלה הזו בסוף השיעור</div>}
               <button ref={contRef} className={'btn ' + (st.ok ? 'btn-green' : 'btn-red')} onClick={next}>המשך</button>
             </div>

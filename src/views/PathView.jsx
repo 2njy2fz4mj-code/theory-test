@@ -1,4 +1,3 @@
-import { useEffect, useRef } from 'react'
 import { ALL_LESSONS, Q, UNITS, shuffle } from '../lib/data.jsx'
 import { dayStr, useStore } from '../lib/store.jsx'
 import { useUI } from '../lib/ui.jsx'
@@ -47,18 +46,14 @@ function ExamPlan() {
 export default function PathView() {
   const { S, seen } = useStore()
   const ui = useUI()
-  const curRef = useRef(null)
 
-  let globalCur = null
+  let cur = null
   for (const u of UNITS) {
-    const l = u.lessons.find((l, i) => !S.done[l.id] && (i === 0 || S.done[u.lessons[i - 1].id]))
-    if (l) { globalCur = l.id; break }
+    const i = u.lessons.findIndex((l, i) => !S.done[l.id] && (i === 0 || S.done[u.lessons[i - 1].id]))
+    if (i >= 0) { cur = { u, l: u.lessons[i], i }; break }
   }
-
-  useEffect(() => {
-    const t = setTimeout(() => curRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' }), 60)
-    return () => clearTimeout(t)
-  }, [])
+  const globalCur = cur?.l.id
+  const started = Object.keys(S.done).length > 0
 
   const open = (u, l, i) => {
     if (i > 0 && !S.done[u.lessons[i - 1].id]) {
@@ -79,6 +74,12 @@ export default function PathView() {
           <p>ראיתם {seen.size} מתוך {Q.length} שאלות · המבחן: 30 שאלות, 40 דקות, עד 4 טעויות</p>
         </div>
       </div>
+      {cur && (
+        <button className="btn btn-green cta" onClick={() => open(cur.u, cur.l, cur.i)}>
+          <span>{started ? 'ממשיכים מאיפה שעצרתם' : 'מתחילים ללמוד'}</span>
+          <small>{cur.u.title} · {cur.l.title} · {cur.l.type === 'review' ? cur.l.count : cur.l.qs.length} שאלות</small>
+        </button>
+      )}
       <ExamPlan />
       {UNITS.map((u, ui2) => {
         const dn = u.lessons.filter((l) => S.done[l.id]).length
@@ -100,7 +101,7 @@ export default function PathView() {
                 const off = OFFS[li % OFFS.length]
                 const ico = done ? IC.check : !unlocked ? IC.lock : l.type === 'review' ? IC.trophy : cur ? IC.star : IC.book
                 return (
-                  <div key={l.id} ref={cur ? curRef : null} className={'node-row' + (cur ? ' current' : '')} style={{ transform: `translateX(${off}px)` }}>
+                  <div key={l.id} className={'node-row' + (cur ? ' current' : '')} style={{ transform: `translateX(${off}px)` }}>
                     {cur && <div className="start-tip">התחילו</div>}
                     <button
                       className={['node', done ? 'done' : !unlocked ? 'locked' : '', l.type === 'review' ? 'review' : ''].join(' ')}

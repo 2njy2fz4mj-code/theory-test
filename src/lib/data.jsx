@@ -89,3 +89,78 @@ export function pickExam(n = 30) {
 }
 
 export const optionOrder = (q) => (q.fixed ? q.o.map((_, i) => i) : shuffle(q.o.map((_, i) => i)))
+
+/* ===== Trap questions =====
+   The kinds of questions that are easiest to get wrong, found in the bank by their shape.
+   Each kind has one tip, a practice set and a list to memorise. */
+const DIGIT = /\d/
+const SIGN_NO = /^(תמרור\s*)?[א-ת]?-?\s?\d{2,3}\.?$/
+const IN_PICTURE = /\(\d\)|נתיב \d|רכב \d|באיזה מספר מסומ/
+const MEASURES = [
+  ['מהירויות', /קמ"ש|קמ״ש/],
+  ['מרחקים ומידות', /מטר|מ"מ|ס"מ|ק"מ|מעלות/],
+  ['משקלים ונוסעים', /ק"ג|טון|נוסעים/],
+  ['זמנים וגילים', /שנה|שנים|שנתיים|חודש|ימים|שעות|שעה|דקות|שניות|גיל/]
+]
+const NEG_Q = /(^|[\s("״])(לא|אינו|אינה|אינם|אינן|אין|אסור|למעט|חוץ)(?=[\s.,?!:;)"״]|$)/
+const ALL_OF = /כל התשובות|אף אחת מהתשובות|שתי התשובות/
+
+function trapKind(q) {
+  const opts = q.o.join(' ')
+  const right = q.o[q.a]
+  if (q.t === 1 && q.img && q.o.every((x) => SIGN_NO.test(x.trim()))) return ['signs']
+  if (q.img && IN_PICTURE.test(q.q + ' ' + opts)) return ['junction']
+  if (DIGIT.test(right) && (q.o.every((x) => DIGIT.test(x)) || !q.img)) {
+    const u = MEASURES.find(([, re]) => re.test(right)) || MEASURES.find(([, re]) => re.test(opts + ' ' + q.q))
+    if (u) return ['numbers', u[0]]
+  }
+  if (NEG_Q.test(q.q) || ALL_OF.test(opts)) return ['wording']
+  return null
+}
+
+export const TRAPS = [
+  {
+    k: 'numbers', title: 'מספרים שחייבים לזכור', c: 'amber',
+    tip: 'מהירויות, מרחקים, משקלים וגילים. אי אפשר לנחש אותם בהיגיון, צריך לזכור. עברו על הרשימה כמה פעמים, ואז תרגלו.',
+    short: 'כאן אין מה לנחש: זוכרים את המספר.'
+  },
+  {
+    k: 'signs', title: 'תמרורים לפי מספר', c: 'red',
+    tip: 'בתמונה כמה תמרורים, ומתחת לכל אחד המספר שלו. קודם מצאו בתמונה את התמרור שמתאים לשאלה, ורק אז חפשו את המספר שלו בתשובות.',
+    short: 'קודם מוצאים את התמרור בתמונה, ואז את המספר שלו.'
+  },
+  {
+    k: 'junction', title: 'זכות קדימה ופניות בציור', c: 'blue',
+    tip: 'עובדים לפי סדר: 1. יש תמרור או רמזור? הוא קובע. 2. אין? נותנים זכות קדימה למי שבא מימין. 3. פונים שמאלה? נותנים גם למי שבא ממול. בסוף מוצאים את המספרים של כלי הרכב בציור.',
+    short: 'תמרור קובע. אין תמרור: הבא מימין קודם, והפונה שמאלה נותן לבא ממול.'
+  },
+  {
+    k: 'wording', title: 'ניסוח מבלבל', c: 'teal',
+    tip: 'מילה אחת הופכת את השאלה: לא, אינו, אסור, למעט. האפליקציה מסמנת אותן בצהוב. קראו את השאלה עד הסוף, ואת כל ארבע התשובות, לפני שעונים.',
+    short: 'שימו לב למילה המסומנת בצהוב. היא הופכת את השאלה.'
+  }
+].map((t) => ({ ...t, ids: [], groups: [] }))
+
+export const TRAP_OF = {}
+{
+  const byK = Object.fromEntries(TRAPS.map((t) => [t.k, t]))
+  const sub = {}
+  for (const q of Q) {
+    const kind = trapKind(q)
+    if (!kind) continue
+    const t = byK[kind[0]]
+    t.ids.push(q.id)
+    TRAP_OF[q.id] = t
+    if (kind[1]) (sub[kind[1]] = sub[kind[1]] || []).push(q.id)
+  }
+  byK.numbers.groups = MEASURES.map(([title]) => ({ title, ids: sub[title] || [] })).filter((g) => g.ids.length)
+}
+export const TRAP_IDS = TRAPS.flatMap((t) => t.ids)
+
+/* Ten questions from a pool: first the ones still wrong, then new ones, then the rest */
+export function pickSet(ids, seen, wrongSet, n = 10) {
+  const w = shuffle(ids.filter((id) => wrongSet.has(id)))
+  const u = shuffle(ids.filter((id) => !seen.has(id) && !wrongSet.has(id)))
+  const r = shuffle(ids.filter((id) => seen.has(id) && !wrongSet.has(id)))
+  return w.concat(u, r).slice(0, n)
+}

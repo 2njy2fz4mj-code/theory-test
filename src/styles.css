@@ -271,3 +271,57 @@ mark.kw{background:var(--kw-bg);color:inherit;border-radius:6px;padding:0 4px;bo
 .foot-pad{padding-block:14px calc(14px + env(safe-area-inset-bottom,0px))}
 .hero-logo{border-radius:22px;box-shadow:0 4px 0 var(--line)}
 input[type="date"]{min-height:40px}
+
+/* five tabs */
+nav.tabs{gap:2px}
+.tab{flex:1;min-width:0;padding:6px 2px;font-size:12.5px}
+.tab svg{width:26px;height:26px}
+
+/* one-tap practice cards */
+.go-chev{flex:none;color:var(--muted);display:grid;place-items:center}
+.go-chev svg{width:22px;height:22px}
+.filter{display:flex;flex-direction:column;gap:8px;font-size:14px;padding:2px 2px 4px}
+.btn.cta{display:flex;flex-direction:column;align-items:center;gap:2px;padding-block:13px}
+.btn.cta span{font-size:20px}
+.btn.cta small{font-family:var(--font-body);font-weight:500;font-size:14px;opacity:.95}
+
+/* trap questions */
+.trap{display:flex;flex-direction:column;gap:12px;background:var(--surface);border:2px solid var(--line);border-top:6px solid var(--tc);border-radius:var(--r);padding:14px 16px 16px;box-shadow:0 4px 0 var(--line)}
+.trap-head{display:flex;align-items:center;gap:12px}
+.trap-head > div:last-child{min-width:0}
+.trap-head h3{font-size:20px}
+.trap-head span{font-size:14px;color:var(--muted)}
+.trap .mode-ico{color:var(--tc);border-color:var(--tc)}
+.trap .bar .fill{background:var(--tc)}
+.trap-tip{margin:0;font-size:15.5px}
+.trap-btns{display:flex;gap:10px}
+.trap-btns .btn{flex:1;padding:12px 8px;font-size:17px}
+
+/* study list */
+.st-title{flex:1;min-width:0;font-size:20px}
+.st-group{font-size:19px;padding-top:6px}
+.tipbox{display:flex;gap:10px;align-items:flex-start;background:var(--amber-bg);color:var(--amber-ink);border-radius:14px;padding:12px 14px;font-size:15.5px}
+.tipbox svg{flex:none;width:22px;height:22px;margin-top:1px}
+.fact{display:flex;flex-direction:column;gap:8px;padding:14px}
+.fact.ok{border-inline-start:6px solid var(--green)}
+.fact.bad{border-inline-start:6px solid var(--red)}
+.fact .q{font-weight:700;font-size:16.5px}
+.fact .ans{display:flex;gap:8px;align-items:flex-start;background:var(--green-bg);color:var(--green-ink);border-radius:12px;padding:9px 12px;font-weight:700;font-size:16.5px;border:0;text-align:start;width:100%}
+.fact .ans svg{flex:none;width:20px;height:20px;margin-top:2px}
+.fact .ans.hidden-ans{background:var(--surface-2);color:var(--blue);justify-content:center;border:2px dashed var(--line)}
+.fact .why{font-size:14.5px;color:var(--muted)}
+.fact-foot{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;color:var(--muted)}
+.fact .visual.photo{align-self:center}
+
+/* zoomable pictures */
+button.visual.photo{display:block;position:relative;cursor:zoom-in;font:inherit}
+.zoom-hint{position:absolute;bottom:6px;left:6px;width:32px;height:32px;border-radius:50%;background:rgba(24,35,47,.72);color:#fff;display:grid;place-items:center}
+.zoom-hint svg{width:18px;height:18px}
+.zoomed{position:fixed;inset:0;z-index:70;background:rgba(8,12,20,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:12px;cursor:zoom-out}
+.zoomed img{max-width:100%;max-height:82vh;width:auto;min-width:min(100%,560px);background:#fff;border-radius:12px;object-fit:contain}
+.zoomed span{color:#fff;font-size:14px;opacity:.8}
+
+.done-screen{flex:none!important;padding-block:24px 8px}
+.ls-foot.stack{gap:10px}
+.fb .note b{font-weight:800}
+.mode > .go-chev{flex:none}

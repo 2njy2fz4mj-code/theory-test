@@ -20,5 +20,9 @@ export const IC = {
   map: <svg viewBox="0 0 24 24" {...s} strokeWidth="2.2"><path d="M3 6.5 9 4l6 2.5L21 4v13.5L15 20l-6-2.5L3 20z" /><path d="M9 4v13.5M15 6.5V20" /></svg>,
   dumbbell: <svg viewBox="0 0 24 24" {...s} strokeWidth="2.2"><path d="M6.5 6.5l11 11M4 9l5-5M15 20l5-5M2.5 11.5l2-2M19.5 14.5l2-2M7 4.5l-2.5 2.5M19.5 17l-2.5 2.5" /></svg>,
   file: <svg viewBox="0 0 24 24" {...s} strokeWidth="2.2"><path d="M6 3h8l4 4v14H6z" /><path d="M14 3v4h4M9 12h6M9 16h6" /></svg>,
+  cross: <svg viewBox="0 0 24 24" {...s} strokeWidth="2.3"><path d="M9 3v6H3M15 3v6h6M9 21v-6H3M15 21v-6h6" /></svg>,
+  eye: <svg viewBox="0 0 24 24" {...s} strokeWidth="2.3"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z" /><circle cx="12" cy="12" r="3" /></svg>,
+  chev: <svg viewBox="0 0 24 24" {...s} strokeWidth="2.8"><path d="M14.5 6l-6 6 6 6" /></svg>,
+  zoom: <svg viewBox="0 0 24 24" {...s} strokeWidth="2.4"><circle cx="10.5" cy="10.5" r="6.5" /><path d="M15.5 15.5L21 21M10.5 8v5M8 10.5h5" /></svg>,
   user: <svg viewBox="0 0 24 24" {...s} strokeWidth="2.2"><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5" /></svg>
 }

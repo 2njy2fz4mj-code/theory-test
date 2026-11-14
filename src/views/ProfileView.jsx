@@ -4,6 +4,7 @@ import { useStore } from '../lib/store.jsx'
 import { useUI } from '../lib/ui.jsx'
 import { sfx } from '../lib/fx.js'
 
+const THEMES = { auto: 'לפי המכשיר', light: 'בהיר', dark: 'כהה' }
 const GOALS = { 10: 'רגוע', 20: 'רגיל', 30: 'רציני', 50: 'מטורף' }
 const isStandalone = () => {
   try { return matchMedia('(display-mode: standalone)').matches || navigator.standalone } catch { return false }
@@ -54,6 +55,14 @@ export default function ProfileView() {
         <div className="chips">
           {Object.entries(GOALS).map(([g, l]) => (
             <button key={g} className="chip" aria-pressed={S.goal === +g} onClick={() => act.setGoal(+g)}>{g} XP · {l}</button>
+          ))}
+        </div>
+      </div>
+      <div className="card stack">
+        <b>מראה</b>
+        <div className="chips">
+          {Object.entries(THEMES).map(([k, l]) => (
+            <button key={k} className="chip" aria-pressed={(S.theme || 'auto') === k} onClick={() => act.setTheme(k)}>{l}</button>
           ))}
         </div>
       </div>
