@@ -1,16 +1,26 @@
 import { useState } from 'react'
 import { imgUrl } from '../lib/data.jsx'
 import Mascot from './Mascot.jsx'
+import { IC } from './Icons.jsx'
 
-export function Photo({ q, small }) {
+export function Photo({ q, small, lazy }) {
   const [err, setErr] = useState(false)
+  const [zoom, setZoom] = useState(false)
   if (!q.img) return null
+  if (err) return <div className={'visual photo err' + (small ? ' small' : '')}>התמונה לא נטענה. בדקו את החיבור לאינטרנט.</div>
   return (
-    <div className={'visual photo' + (small ? ' small' : '') + (err ? ' err' : '')}>
-      {err ? 'התמונה לא נטענה. בדקו את החיבור לאינטרנט.' : (
-        <img src={imgUrl(q.img)} alt="תמונה לשאלה" onError={() => setErr(true)} />
+    <>
+      <button type="button" className={'visual photo' + (small ? ' small' : '')} aria-label="הגדלת התמונה" onClick={() => setZoom(true)}>
+        <img src={imgUrl(q.img)} alt="תמונה לשאלה" loading={lazy ? 'lazy' : undefined} onError={() => setErr(true)} />
+        {!small && <span className="zoom-hint">{IC.zoom}</span>}
+      </button>
+      {zoom && (
+        <div className="zoomed" role="dialog" aria-label="תמונה מוגדלת" onClick={() => setZoom(false)}>
+          <img src={imgUrl(q.img)} alt="תמונה לשאלה" />
+          <span>הקישו כדי לסגור</span>
+        </div>
       )}
-    </div>
+    </>
   )
 }
 

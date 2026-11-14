@@ -5,7 +5,7 @@ import { setSound } from './fx.js'
 const KEY = 'theory-bekal-v1'
 const DEF = () => ({
   name: '', xp: 0, streak: 0, lastDay: null, day: null, dayXp: 0, goal: 20,
-  done: {}, wrong: [], seen: [], examDate: '', answered: 0, correct: 0, exams: [], sound: true
+  done: {}, wrong: [], seen: [], examDate: '', answered: 0, correct: 0, exams: [], sound: true, miss: {}, theme: 'auto'
 })
 
 export const dayStr = (d = new Date()) =>
@@ -17,6 +17,7 @@ function load() {
   try { s = { ...DEF(), ...(JSON.parse(localStorage.getItem(KEY) || '{}') || {}) } } catch { s = DEF() }
   s.wrong = s.wrong.filter((id) => QBY[id])
   s.seen = s.seen.filter((id) => QBY[id])
+  if (!s.miss || typeof s.miss !== 'object') s.miss = {}
   return s
 }
 // start a new day: reset today's XP, break the streak if a day was skipped
@@ -31,8 +32,26 @@ function applyAnswer(s, id, ok) {
   const wrong = s.wrong.filter((x) => x !== id)
   if (!ok) wrong.push(id)
   const seen = s.seen.includes(id) ? s.seen : [...s.seen, id]
-  return { ...s, answered: s.answered + 1, correct: s.correct + (ok ? 1 : 0), wrong, seen }
+  // how many times a question still has to be answered right to make up for past mistakes
+  const miss = { ...s.miss }
+  if (!ok) miss[id] = Math.min((miss[id] || 0) + 1, 3)
+  else if (miss[id] > 1) miss[id]--
+  else delete miss[id]
+  return { ...s, answered: s.answered + 1, correct: s.correct + (ok ? 1 : 0), wrong, seen, miss }
 }
+
+/* A test in progress is kept apart, so closing the app in the middle does not lose it */
+const EXAM_KEY = 'theory-bekal-exam'
+export function loadExam() {
+  try {
+    const e = JSON.parse(localStorage.getItem(EXAM_KEY) || 'null')
+    if (!e || !Array.isArray(e.ids) || !e.ids.length || !e.ids.every((id) => QBY[id])) return null
+    if (!Array.isArray(e.ans) || !Array.isArray(e.orders) || e.ans.length !== e.ids.length || e.orders.length !== e.ids.length) return null
+    return e
+  } catch { return null }
+}
+export const saveExam = (e) => { try { localStorage.setItem(EXAM_KEY, JSON.stringify(e)) } catch { /* private mode */ } }
+export const clearExam = () => { try { localStorage.removeItem(EXAM_KEY) } catch { /* private mode */ } }
 
 const Ctx = createContext(null)
 
@@ -41,6 +60,11 @@ export function StoreProvider({ children }) {
 
   useEffect(() => { try { localStorage.setItem(KEY, JSON.stringify(S)) } catch { /* private mode */ } }, [S])
   useEffect(() => { setSound(S.sound) }, [S.sound])
+  useEffect(() => {
+    const el = document.documentElement
+    if (S.theme === 'light' || S.theme === 'dark') el.dataset.theme = S.theme
+    else delete el.dataset.theme
+  }, [S.theme])
   useEffect(() => {
     const f = () => { if (!document.hidden) setS(roll) }
     document.addEventListener('visibilitychange', f)
@@ -62,8 +86,9 @@ export function StoreProvider({ children }) {
     setGoal: (goal) => setS((s) => ({ ...s, goal })),
     setName: (name) => setS((s) => ({ ...s, name })),
     setExamDate: (examDate) => setS((s) => ({ ...s, examDate })),
+    setTheme: (theme) => setS((s) => ({ ...s, theme })),
     toggleSound: () => setS((s) => ({ ...s, sound: !s.sound })),
-    reset: () => setS((s) => roll({ ...DEF(), name: s.name }))
+    reset: () => { clearExam(); setS((s) => roll({ ...DEF(), name: s.name, theme: s.theme, sound: s.sound })) }
   }), [])
 
   const value = useMemo(() => ({ S, act, seen: new Set(S.seen) }), [S, act])

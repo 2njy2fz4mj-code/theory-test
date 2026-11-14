@@ -5,14 +5,17 @@ import { sfx } from './lib/fx.js'
 import { IC } from './components/Icons.jsx'
 import PathView from './views/PathView.jsx'
 import PracticeView from './views/PracticeView.jsx'
+import HardView from './views/HardView.jsx'
 import ExamsView from './views/ExamsView.jsx'
 import ProfileView from './views/ProfileView.jsx'
 import Lesson from './screens/Lesson.jsx'
 import Exam from './screens/Exam.jsx'
+import Study from './screens/Study.jsx'
 
 const TABS = [
   ['path', 'מסלול', IC.map, PathView],
   ['practice', 'תרגול', IC.dumbbell, PracticeView],
+  ['hard', 'מכשילות', IC.sign, HardView],
   ['exams', 'מבחנים', IC.file, ExamsView],
   ['profile', 'פרופיל', IC.user, ProfileView]
 ]
@@ -39,7 +42,8 @@ function TopBar() {
 export default function App() {
   const [view, setView] = useState(fromHash)
   const [lesson, setLesson] = useState(null)
-  const [exam, setExam] = useState(false)
+  const [exam, setExam] = useState(null)
+  const [study, setStudy] = useState(null)
   const mainRef = useRef(null)
 
   useEffect(() => {
@@ -55,12 +59,13 @@ export default function App() {
     try { history.replaceState(null, '', '#' + v) } catch { /* sandboxed */ }
   }
   const startLesson = useCallback((cfg) => setLesson({ ...cfg, key: Date.now() }), [])
-  const startExam = useCallback(() => setExam(true), [])
+  const startExam = useCallback((resume) => setExam({ resume: !!resume, key: Date.now() }), [])
+  const startStudy = useCallback((cfg) => setStudy({ ...cfg, key: Date.now() }), [])
 
   const View = TABS.find(([k]) => k === view)[3]
 
   return (
-    <UIProvider startLesson={startLesson} startExam={startExam}>
+    <UIProvider startLesson={startLesson} startExam={startExam} startStudy={startStudy}>
       <div id="app">
         <TopBar />
         <main ref={mainRef}>
@@ -74,8 +79,9 @@ export default function App() {
           ))}
         </nav>
       </div>
+      {study && <Study key={study.key} cfg={study} onClose={() => setStudy(null)} />}
       {lesson && <Lesson key={lesson.key} cfg={lesson} onClose={() => setLesson(null)} />}
-      {exam && <Exam onClose={() => setExam(false)} />}
+      {exam && <Exam key={exam.key} resume={exam.resume} onClose={() => setExam(null)} />}
     </UIProvider>
   )
 }
