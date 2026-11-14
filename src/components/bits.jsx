@@ -43,7 +43,7 @@ export function Coach({ children }) {
   return (
     <div className="coach">
       <div className="bubble">{children}<small>תאוריה בקל</small></div>
-      <Mascot size={90} />
+      <Mascot size={64} />
     </div>
   )
 }

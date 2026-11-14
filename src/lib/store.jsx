@@ -5,7 +5,7 @@ import { setSound } from './fx.js'
 const KEY = 'theory-bekal-v1'
 const DEF = () => ({
   name: '', xp: 0, streak: 0, lastDay: null, day: null, dayXp: 0, goal: 20,
-  done: {}, wrong: [], seen: [], examDate: '', answered: 0, correct: 0, exams: [], sound: true, miss: {}, theme: 'auto'
+  done: {}, wrong: [], seen: [], examDate: '', answered: 0, correct: 0, exams: [], sound: true, miss: {}, theme: 'auto', intro: true
 })
 
 export const dayStr = (d = new Date()) =>
@@ -86,9 +86,10 @@ export function StoreProvider({ children }) {
     setGoal: (goal) => setS((s) => ({ ...s, goal })),
     setName: (name) => setS((s) => ({ ...s, name })),
     setExamDate: (examDate) => setS((s) => ({ ...s, examDate })),
+    hideIntro: () => setS((s) => ({ ...s, intro: false })),
     setTheme: (theme) => setS((s) => ({ ...s, theme })),
     toggleSound: () => setS((s) => ({ ...s, sound: !s.sound })),
-    reset: () => { clearExam(); setS((s) => roll({ ...DEF(), name: s.name, theme: s.theme, sound: s.sound })) }
+    reset: () => { clearExam(); setS((s) => roll({ ...DEF(), name: s.name, theme: s.theme, sound: s.sound, intro: s.intro })) }
   }), [])
 
   const value = useMemo(() => ({ S, act, seen: new Set(S.seen) }), [S, act])

@@ -38,10 +38,10 @@ function TopBar() {
   const today = S.lastDay === S.day
   return (
     <header className="top gut">
-      <div className={'stat streak' + (today ? ' on' : '')} title="ימי רצף">{IC.flame}<span>{S.streak}</span></div>
-      <div className="stat xp" title="נקודות XP"><span className="xp-chip">XP</span><span>{S.xp}</span></div>
+      <div className={'stat streak' + (today ? ' on' : '')} title="ימי רצף">{IC.flame}<span>{S.streak}</span><small>ימי רצף</small></div>
+      <div className="stat xp" title="נקודות XP"><span className="xp-chip">XP</span><span>{S.xp}</span><small>נקודות</small></div>
       <div className="goal">
-        <div className="goal-txt">{IC.target}<span>{Math.min(S.dayXp, S.goal)}/{S.goal} XP היום</span></div>
+        <div className="goal-txt">{IC.target}<span>היעד להיום: {Math.min(S.dayXp, S.goal)}/{S.goal} XP</span></div>
         <div className="bar"><div className="fill" style={{ width: Math.min(100, (S.dayXp / S.goal) * 100) + '%' }} /></div>
       </div>
     </header>
