@@ -10,8 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tesseract.js-data/heb": "^1.0.0",
+    "pdfjs-dist": "^6.5.438",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "tesseract.js": "^7.0.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^5.0.4",

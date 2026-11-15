@@ -1,6 +1,7 @@
 import { clearExam, loadExam, useStore } from '../lib/store.jsx'
 import { useUI } from '../lib/ui.jsx'
 import { Coach } from '../components/bits.jsx'
+import { IC } from '../components/Icons.jsx'
 
 export default function ExamsView() {
   const { S } = useStore()
@@ -21,6 +22,14 @@ export default function ExamsView() {
         </div>
       )}
       <button className={'btn ' + (saved ? 'btn-outline' : 'btn-primary')} onClick={newExam}>מבחן חדש</button>
+      <button className="mode" onClick={ui.openSheet}>
+        <div className="mode-ico" style={{ color: 'var(--red)', borderColor: 'var(--red)' }}>{IC.upload}</div>
+        <div>
+          <b>דף הטעויות מהמבחן האמיתי</b>
+          <span>{S.sheet.length ? `${S.sheet.length} שאלות שמורות לתרגול` : 'נכשלתם? העלו את הדף ותרגלו בדיוק את השאלות שטעיתם בהן'}</span>
+        </div>
+        <div className="go-chev">{IC.chev}</div>
+      </button>
       {S.exams.length ? (
         <div className="card">
           <div className="row" style={{ marginBottom: 4 }}><b>היסטוריה</b><span className="muted">שיא: {best}/30</span></div>

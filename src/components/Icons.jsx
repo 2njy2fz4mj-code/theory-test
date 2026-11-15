@@ -24,5 +24,8 @@ export const IC = {
   eye: <svg viewBox="0 0 24 24" {...s} strokeWidth="2.3"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z" /><circle cx="12" cy="12" r="3" /></svg>,
   chev: <svg viewBox="0 0 24 24" {...s} strokeWidth="2.8"><path d="M14.5 6l-6 6 6 6" /></svg>,
   zoom: <svg viewBox="0 0 24 24" {...s} strokeWidth="2.4"><circle cx="10.5" cy="10.5" r="6.5" /><path d="M15.5 15.5L21 21M10.5 8v5M8 10.5h5" /></svg>,
+  upload: <svg viewBox="0 0 24 24" {...s} strokeWidth="2.3"><path d="M12 16V4M7 9l5-5 5 5M5 15v4h14v-4" /></svg>,
+  trash: <svg viewBox="0 0 24 24" {...s} strokeWidth="2.2"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13M10 11v6M14 11v6" /></svg>,
+  lockSm: <svg viewBox="0 0 24 24" {...s} strokeWidth="2.4"><rect x="5" y="11" width="14" height="10" rx="2.5" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg>,
   user: <svg viewBox="0 0 24 24" {...s} strokeWidth="2.2"><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5" /></svg>
 }
