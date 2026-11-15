@@ -1,11 +1,12 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { QBY } from './data.jsx'
 import { setSound } from './fx.js'
+import { clearPages } from './sheet.js'
 
 const KEY = 'theory-bekal-v1'
 const DEF = () => ({
   name: '', xp: 0, streak: 0, lastDay: null, day: null, dayXp: 0, goal: 20,
-  done: {}, wrong: [], seen: [], examDate: '', answered: 0, correct: 0, exams: [], sound: true, miss: {}, theme: 'auto', intro: true
+  done: {}, wrong: [], seen: [], examDate: '', answered: 0, correct: 0, exams: [], sound: true, miss: {}, theme: 'auto', intro: true, sheet: []
 })
 
 export const dayStr = (d = new Date()) =>
@@ -18,6 +19,7 @@ function load() {
   s.wrong = s.wrong.filter((id) => QBY[id])
   s.seen = s.seen.filter((id) => QBY[id])
   if (!s.miss || typeof s.miss !== 'object') s.miss = {}
+  s.sheet = Array.isArray(s.sheet) ? s.sheet.filter((id) => QBY[id]) : []
   return s
 }
 // start a new day: reset today's XP, break the streak if a day was skipped
@@ -87,9 +89,12 @@ export function StoreProvider({ children }) {
     setName: (name) => setS((s) => ({ ...s, name })),
     setExamDate: (examDate) => setS((s) => ({ ...s, examDate })),
     hideIntro: () => setS((s) => ({ ...s, intro: false })),
+    addSheet: (ids) => setS((s) => ({ ...s, sheet: [...new Set([...s.sheet, ...ids])] })),
+    removeSheet: (id) => setS((s) => ({ ...s, sheet: s.sheet.filter((x) => x !== id) })),
+    clearSheet: () => setS((s) => ({ ...s, sheet: [] })),
     setTheme: (theme) => setS((s) => ({ ...s, theme })),
     toggleSound: () => setS((s) => ({ ...s, sound: !s.sound })),
-    reset: () => { clearExam(); setS((s) => roll({ ...DEF(), name: s.name, theme: s.theme, sound: s.sound, intro: s.intro })) }
+    reset: () => { clearExam(); clearPages(); setS((s) => roll({ ...DEF(), name: s.name, theme: s.theme, sound: s.sound, intro: s.intro })) }
   }), [])
 
   const value = useMemo(() => ({ S, act, seen: new Set(S.seen) }), [S, act])

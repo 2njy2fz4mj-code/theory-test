@@ -11,6 +11,7 @@ import ProfileView from './views/ProfileView.jsx'
 import Lesson from './screens/Lesson.jsx'
 import Exam from './screens/Exam.jsx'
 import Study from './screens/Study.jsx'
+import MySheet from './screens/MySheet.jsx'
 
 const TABS = [
   ['path', 'מסלול', IC.map, PathView],
@@ -53,6 +54,7 @@ export default function App() {
   const [lesson, setLesson] = useState(null)
   const [exam, setExam] = useState(null)
   const [study, setStudy] = useState(null)
+  const [sheet, setSheet] = useState(false)
   const mainRef = useRef(null)
   const [news, setNews] = useState(newsPending)
   const closeNews = (to) => {
@@ -75,12 +77,13 @@ export default function App() {
   }
   const startLesson = useCallback((cfg) => setLesson({ ...cfg, key: Date.now() }), [])
   const startExam = useCallback((resume) => setExam({ resume: !!resume, key: Date.now() }), [])
+  const openSheet = useCallback(() => setSheet(true), [])
   const startStudy = useCallback((cfg) => setStudy({ ...cfg, key: Date.now() }), [])
 
   const View = TABS.find(([k]) => k === view)[3]
 
   return (
-    <UIProvider startLesson={startLesson} startExam={startExam} startStudy={startStudy}>
+    <UIProvider startLesson={startLesson} startExam={startExam} startStudy={startStudy} openSheet={openSheet}>
       <div id="app">
         <TopBar />
         <main ref={mainRef}>
@@ -105,6 +108,7 @@ export default function App() {
           </div>
         </div>
       )}
+      {sheet && <MySheet onClose={() => setSheet(false)} />}
       {study && <Study key={study.key} cfg={study} onClose={() => setStudy(null)} />}
       {lesson && <Lesson key={lesson.key} cfg={lesson} onClose={() => setLesson(null)} />}
       {exam && <Exam key={exam.key} resume={exam.resume} onClose={() => setExam(null)} />}

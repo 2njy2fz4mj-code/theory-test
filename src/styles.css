@@ -361,3 +361,20 @@ button.visual.photo{display:block;position:relative;cursor:zoom-in;font:inherit}
 .opt{line-height:1.4}
 .section-title{font-size:21px}
 .view{gap:18px}
+
+/* my mistakes sheet */
+.tipbox.private{background:var(--green-bg);color:var(--green-ink)}
+.reading{display:flex;flex-direction:column;gap:10px}
+.btn svg{width:22px;height:22px;vertical-align:-4px;margin-inline-end:6px}
+.pickrow{align-items:flex-start;padding:12px}
+.pickrow b{font-family:var(--font-body);font-size:15.5px;font-weight:700;line-height:1.35}
+.pickrow span{font-size:14px}
+.pickrow .check-dot{margin-top:2px}
+.pickrow .check-dot svg{width:16px;height:16px}
+.check-dot.plus{color:var(--blue);border-color:var(--blue);font-weight:800;font-size:18px;line-height:1}
+.pages{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px}
+.page-thumb{flex:none;width:92px;height:124px;border:2px solid var(--line);border-radius:12px;overflow:hidden;padding:0;background:#fff}
+.page-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.fact-actions{display:flex;align-items:center;gap:8px}
+.icon-btn.sm svg{width:22px;height:22px}
+.danger-link{color:var(--red);font-size:14px}
