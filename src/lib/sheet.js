@@ -22,10 +22,12 @@ function index() {
   if (INDEX) return INDEX
   const post = new Map() // trigram -> [questionIndex * 3 + part]
   const sizes = []
+  const qGrams = []
   const textCount = new Map()
   Q.forEach((q, qi) => {
     const parts = [grams(q.q), grams(q.o[q.a]), grams(q.q + ' ' + q.o.join(' '))]
     sizes.push(parts.map((p) => p.size || 1))
+    qGrams.push(parts[0])
     parts.forEach((p, k) => p.forEach((g) => {
       let a = post.get(g)
       if (!a) post.set(g, (a = []))
@@ -34,15 +36,15 @@ function index() {
     const key = norm(q.q)
     textCount.set(key, (textCount.get(key) || 0) + 1)
   })
-  INDEX = { post, sizes, unique: Q.map((q) => textCount.get(norm(q.q)) === 1) }
+  INDEX = { post, sizes, qGrams, unique: Q.map((q) => textCount.get(norm(q.q)) === 1) }
   return INDEX
 }
 
 const WINDOW = 7
 
-/* text -> [{ id, score }] best first */
+/* text -> [{ id, score, sure }] in the order they appear on the page */
 export function matchText(text) {
-  const { post, sizes, unique } = index()
+  const { post, sizes, qGrams, unique } = index()
   const lines = text.split(/\n+/).map((l) => l.trim()).filter((l) => norm(l).length >= 2)
   if (!lines.length) return []
   const lineGrams = lines.map(grams)
@@ -54,13 +56,22 @@ export function matchText(text) {
     G.forEach((g) => post.get(g)?.forEach((code) => { if (code % 3 < 2) hit.set(code, (hit.get(code) || 0) + 1) }))
     return hit
   })
-  // the line of the question itself: the last line at or before the answer that holds most of its text
+  // A question is printed on a few lines in a row. Find the three lines that hold most of its text:
+  // words scattered over the page (from other questions) do not add up to a match.
   const place = (qi, from, to) => {
-    let aLine = from, aMax = -1, qLine = from, qMax = -1
-    for (let l = from; l < to; l++) { const n = lineHits[l].get(qi * 3 + 1) || 0; if (n > aMax) { aMax = n; aLine = l } }
-    for (let l = from; l < to; l++) { const n = lineHits[l].get(qi * 3) || 0; if (n > qMax) { qMax = n; qLine = l } }
-    for (let l = aLine; l >= from; l--) if ((lineHits[l].get(qi * 3) || 0) >= 0.6 * sizes[qi][0]) return l
-    return qLine
+    let start = from, top = -1
+    for (let l = from; l < to; l++) {
+      let n = 0
+      qGrams[qi].forEach((g) => { if (lineGrams[l].has(g) || lineGrams[l + 1]?.has(g) || lineGrams[l + 2]?.has(g)) n++ })
+      if (n > top) { top = n; start = l }
+    }
+    // of those three lines, the one that carries most of the question is where it starts
+    let pos = start, qMax = -1
+    for (let l = start; l < Math.min(lines.length, start + 3); l++) { const n = lineHits[l].get(qi * 3) || 0; if (n > qMax) { qMax = n; pos = l } }
+    // the right answer is printed just below it
+    let aLine = pos, aMax = 0
+    for (let l = pos; l < Math.min(lines.length, pos + 5); l++) { const n = lineHits[l].get(qi * 3 + 1) || 0; if (n > aMax) { aMax = n; aLine = l } }
+    return [pos, aLine, top / sizes[qi][0]]
   }
 
   for (let i = 0; i < lines.length; i++) {
@@ -75,24 +86,31 @@ export function matchText(text) {
       if (seen.has(qi)) return
       seen.add(qi)
       const cq = (hits.get(qi * 3) || 0) / sizes[qi][0]
-      if (cq < 0.72) return
+      if (cq < 0.55) return
       const ca = (hits.get(qi * 3 + 1) || 0) / sizes[qi][1]
       const call = (hits.get(qi * 3 + 2) || 0) / sizes[qi][2]
       // many questions share one wording ("what does the sign mean?"): those are told apart by the answer only
-      const withAnswer = ca >= 0.6 || (unique[qi] && call >= 0.55)
-      const textOnly = unique[qi] && sizes[qi][0] >= 25 && cq >= 0.85
-      if (!withAnswer && !textOnly) return
-      const score = cq * 0.4 + ca * 0.4 + call * 0.2
+      const sure = cq >= 0.72 && (ca >= 0.6 || (unique[qi] && call >= 0.55) || (unique[qi] && sizes[qi][0] >= 25 && cq >= 0.85))
+      // a blurry photo loses letters: a weaker match is offered as "maybe" for the learner to decide
+      const maybe = ca >= 0.45 || (unique[qi] && sizes[qi][0] >= 18 && (call >= 0.4 || cq >= 0.65))
+      if (!sure && !maybe) return
+      const [pos, last, near] = place(qi, i, end)
+      if (near < (sure ? 0.68 : 0.55)) return
+      const score = (sure ? 1 : 0) + cq * 0.4 + ca * 0.4 + call * 0.2
       const b = best.get(qi)
-      if (!b || score > b.score) best.set(qi, { score, pos: place(qi, i, end) })
+      if (!b || score > b.score) {
+        // how much of the page this match explains: the longer text wins a shared spot
+        best.set(qi, { score, sure, pos, last, mass: (sure ? 1e6 : 0) + (hits.get(qi * 3) || 0) + (hits.get(qi * 3 + 1) || 0) })
+      }
     })
   }
 
-  // two questions cannot sit on the same spot of the page: the better match wins
+  // two questions cannot sit on the same lines of the page. A short question can hide inside the answer
+  // of a longer one, so the match that explains more text keeps the spot.
   const out = []
-  ;[...best.entries()].sort((a, b) => b[1].score - a[1].score).forEach(([qi, b]) => {
-    if (out.some((o) => Math.abs(o.pos - b.pos) <= 1)) return
-    out.push({ id: Q[qi].id, score: b.score, pos: b.pos })
+  ;[...best.entries()].sort((a, b) => b[1].mass - a[1].mass).forEach(([qi, b]) => {
+    if (out.some((o) => b.pos <= o.last && o.pos <= b.last)) return
+    out.push({ id: Q[qi].id, score: b.score, sure: b.sure, pos: b.pos, last: b.last })
   })
   return out.sort((a, b) => a.pos - b.pos)
 }
@@ -144,6 +162,46 @@ async function pdfToCanvases(file) {
   }
   return out
 }
+/* A second copy of the page for the reader: bigger, grey, with the shadows of a phone photo evened out */
+function enhance(src) {
+  const k = Math.min(2, Math.max(1, 2400 / Math.max(src.width, src.height)))
+  const c = document.createElement('canvas')
+  c.width = Math.round(src.width * k); c.height = Math.round(src.height * k)
+  const ctx = c.getContext('2d')
+  ctx.imageSmoothingQuality = 'high'
+  ctx.drawImage(src, 0, 0, c.width, c.height)
+  const img = ctx.getImageData(0, 0, c.width, c.height)
+  const d = img.data, W = c.width, H = c.height
+  const grey = new Float32Array(W * H)
+  for (let i = 0; i < W * H; i++) grey[i] = 0.299 * d[i * 4] + 0.587 * d[i * 4 + 1] + 0.114 * d[i * 4 + 2]
+  // paper brightness per block of the page = its brightest tenth; dividing by it removes shadows
+  const B = 48, bw = Math.ceil(W / B), bh = Math.ceil(H / B)
+  const paper = new Float32Array(bw * bh)
+  for (let by = 0; by < bh; by++) for (let bx = 0; bx < bw; bx++) {
+    const hist = new Uint32Array(256); let n = 0
+    for (let y = by * B; y < Math.min(H, by * B + B); y += 2) for (let x = bx * B; x < Math.min(W, bx * B + B); x += 2) { hist[grey[y * W + x] | 0]++; n++ }
+    let acc = 0, v = 255
+    for (; v > 0; v--) { acc += hist[v]; if (acc >= n * 0.1) break }
+    paper[by * bw + bx] = Math.max(60, v)
+  }
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const p = paper[Math.min(bh - 1, (y / B) | 0) * bw + Math.min(bw - 1, (x / B) | 0)]
+    let v = grey[y * W + x] / p
+    v = v < 0.55 ? v * 0.6 : v > 0.9 ? 1 : v
+    const o = Math.max(0, Math.min(255, v * 255)); const i = (y * W + x) * 4
+    d[i] = d[i + 1] = d[i + 2] = o; d[i + 3] = 255
+  }
+  ctx.putImageData(img, 0, 0)
+  return c
+}
+function mergeFound(lists) {
+  const by = new Map()
+  lists.forEach((l, k) => l.forEach((f) => {
+    const b = by.get(f.id)
+    if (!b || f.score > b.score) by.set(f.id, { ...f, pos: f.pos + k * 0.001 })
+  }))
+  return [...by.values()].sort((a, b) => a.pos - b.pos).sort((a, b) => (b.sure ? 1 : 0) - (a.sure ? 1 : 0))
+}
 function thumb(canvas) {
   const [w, h] = fit(canvas.width, canvas.height, 1300)
   const c = document.createElement('canvas')
@@ -169,16 +227,20 @@ export async function readSheet(files, onProgress = () => {}) {
     workerPath: base + 'worker.min.js', corePath: base, langPath: base, gzip: true,
     logger: (m) => { if (m.status === 'recognizing text') onProgress(0.15 + 0.8 * ((page + m.progress) / canvases.length), 'קורא את הדף') }
   })
-  let text = ''
+  const texts = ['', '']
   try {
     for (const c of canvases) {
-      const { data } = await worker.recognize(c)
-      text += data.text + '\n'
-      page++
+      // every page is read twice, as it is and cleaned up; whatever either reading finds counts
+      const a = await worker.recognize(c)
+      texts[0] += a.data.text + '\n'
+      page += 0.5
+      const b = await worker.recognize(enhance(c))
+      texts[1] += b.data.text + '\n'
+      page += 0.5
     }
   } finally { await worker.terminate() }
   onProgress(0.97, 'מחפש את השאלות במאגר')
-  return { found: matchText(text), pages: canvases.map(thumb), text }
+  return { found: mergeFound(texts.map(matchText)), pages: canvases.map(thumb), text: texts.join('\n') }
 }
 
 /* The uploaded pages are kept in the browser's own storage on this device */
@@ -200,6 +262,11 @@ const tx = async (mode, fn) => {
     t.onerror = () => rej(t.error)
   })
 }
-export const savePages = (urls) => tx('readwrite', (s) => { urls.forEach((u) => s.add(u)) }).catch(() => {})
-export const loadPages = () => tx('readonly', (s) => s.getAll()).then((r) => r || []).catch(() => [])
-export const clearPages = () => tx('readwrite', (s) => { s.clear() }).catch(() => {})
+const pageOf = (v) => (typeof v === 'string' ? { sid: 'old', url: v } : v)
+export const savePages = (sid, urls) => tx('readwrite', (s) => { urls.forEach((url) => s.add({ sid, url })) }).catch(() => {})
+export const loadPages = (sid) => tx('readonly', (s) => s.getAll()).then((r) => (r || []).map(pageOf).filter((p) => p.sid === sid).map((p) => p.url)).catch(() => [])
+export const clearPages = (sid) => tx('readwrite', (s) => {
+  if (!sid) { s.clear(); return }
+  const r = s.openCursor()
+  r.onsuccess = () => { const c = r.result; if (!c) return; if (pageOf(c.value).sid === sid) c.delete(); c.continue() }
+}).catch(() => {})

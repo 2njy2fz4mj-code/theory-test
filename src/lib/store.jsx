@@ -6,7 +6,7 @@ import { clearPages } from './sheet.js'
 const KEY = 'theory-bekal-v1'
 const DEF = () => ({
   name: '', xp: 0, streak: 0, lastDay: null, day: null, dayXp: 0, goal: 20,
-  done: {}, wrong: [], seen: [], examDate: '', answered: 0, correct: 0, exams: [], sound: true, miss: {}, theme: 'auto', intro: true, sheet: []
+  done: {}, wrong: [], seen: [], examDate: '', answered: 0, correct: 0, exams: [], sound: true, miss: {}, theme: 'auto', intro: true, sheets: []
 })
 
 export const dayStr = (d = new Date()) =>
@@ -19,7 +19,10 @@ function load() {
   s.wrong = s.wrong.filter((id) => QBY[id])
   s.seen = s.seen.filter((id) => QBY[id])
   if (!s.miss || typeof s.miss !== 'object') s.miss = {}
-  s.sheet = Array.isArray(s.sheet) ? s.sheet.filter((id) => QBY[id]) : []
+  s.sheets = (Array.isArray(s.sheets) ? s.sheets : []).map((x) => ({ ...x, ids: (x.ids || []).filter((id) => QBY[id]) }))
+  // the first version kept one list for everything
+  if (Array.isArray(s.sheet) && s.sheet.length && !s.sheets.length) s.sheets = [{ id: 'old', d: dayStr(), ids: s.sheet.filter((id) => QBY[id]) }]
+  delete s.sheet
   return s
 }
 // start a new day: reset today's XP, break the streak if a day was skipped
@@ -89,9 +92,16 @@ export function StoreProvider({ children }) {
     setName: (name) => setS((s) => ({ ...s, name })),
     setExamDate: (examDate) => setS((s) => ({ ...s, examDate })),
     hideIntro: () => setS((s) => ({ ...s, intro: false })),
-    addSheet: (ids) => setS((s) => ({ ...s, sheet: [...new Set([...s.sheet, ...ids])] })),
-    removeSheet: (id) => setS((s) => ({ ...s, sheet: s.sheet.filter((x) => x !== id) })),
-    clearSheet: () => setS((s) => ({ ...s, sheet: [] })),
+    // sid = one real test; adding to a test that is not there yet creates it
+    addToSheet: (sid, ids) => setS((s) => {
+      const has = s.sheets.some((x) => x.id === sid)
+      const sheets = has
+        ? s.sheets.map((x) => (x.id === sid ? { ...x, ids: [...new Set([...x.ids, ...ids])] } : x))
+        : [...s.sheets, { id: sid, d: dayStr(), ids: [...new Set(ids)] }]
+      return { ...s, sheets }
+    }),
+    removeFromSheet: (sid, id) => setS((s) => ({ ...s, sheets: s.sheets.map((x) => (x.id === sid ? { ...x, ids: x.ids.filter((y) => y !== id) } : x)) })),
+    deleteSheet: (sid) => setS((s) => ({ ...s, sheets: s.sheets.filter((x) => x.id !== sid) })),
     setTheme: (theme) => setS((s) => ({ ...s, theme })),
     toggleSound: () => setS((s) => ({ ...s, sound: !s.sound })),
     reset: () => { clearExam(); clearPages(); setS((s) => roll({ ...DEF(), name: s.name, theme: s.theme, sound: s.sound, intro: s.intro })) }

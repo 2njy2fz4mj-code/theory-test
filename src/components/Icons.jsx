@@ -27,5 +27,9 @@ export const IC = {
   upload: <svg viewBox="0 0 24 24" {...s} strokeWidth="2.3"><path d="M12 16V4M7 9l5-5 5 5M5 15v4h14v-4" /></svg>,
   trash: <svg viewBox="0 0 24 24" {...s} strokeWidth="2.2"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13M10 11v6M14 11v6" /></svg>,
   lockSm: <svg viewBox="0 0 24 24" {...s} strokeWidth="2.4"><rect x="5" y="11" width="14" height="10" rx="2.5" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg>,
+  home: <svg viewBox="0 0 24 24" {...s} strokeWidth="2.2"><path d="M4 11l8-7 8 7v9h-5v-6h-6v6H4z" /></svg>,
+  gear: <svg viewBox="0 0 24 24" {...s} strokeWidth="2.1"><circle cx="12" cy="12" r="3.2" /><path d="M12 3v2.5M12 18.500V21M3 12h2.500M18.500 12H21M5.600 5.600l1.800 1.800M16.600 16.600l1.800 1.800M5.600 18.400l1.800-1.800M16.600 7.400l1.800-1.800" /></svg>,
+  down: <svg viewBox="0 0 24 24" {...s} strokeWidth="2.8"><path d="M6 9.500l6 6 6-6" /></svg>,
+  plus: <svg viewBox="0 0 24 24" {...s} strokeWidth="2.8"><path d="M12 5v14M5 12h14" /></svg>,
   user: <svg viewBox="0 0 24 24" {...s} strokeWidth="2.2"><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5" /></svg>
 }

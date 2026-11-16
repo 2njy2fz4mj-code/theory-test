@@ -1,4 +1,4 @@
-import { QBY, TRAPS, TRAP_IDS, pickSet } from '../lib/data.jsx'
+import { TRAPS, TRAP_IDS, pickSet } from '../lib/data.jsx'
 import { useStore } from '../lib/store.jsx'
 import { useUI } from '../lib/ui.jsx'
 import { IC } from '../components/Icons.jsx'
@@ -13,7 +13,6 @@ export default function HardView() {
   const wrongSet = new Set(S.wrong)
   const knows = (id) => seen.has(id) && !wrongSet.has(id)
 
-  const mine = Object.keys(S.miss).filter((id) => QBY[id]).sort((a, b) => S.miss[b] - S.miss[a])
   const known = TRAP_IDS.filter(knows).length
 
   const practice = (label, ids, trap) => {
@@ -31,20 +30,6 @@ export default function HardView() {
           {TRAP_IDS.length} שאלות מהמאגר · אתם כבר יודעים {known}
         </p>
       </div>
-
-      {mine.length > 0 && (
-        <section className="trap" style={{ '--tc': 'var(--red)', '--tcd': 'var(--red-d)' }}>
-          <div className="trap-head">
-            <div className="mode-ico">{IC.redo}</div>
-            <div><h3>השאלות שאתם נופלים בהן</h3><span>{mine.length === 1 ? 'שאלה אחת שטעיתם בה' : `${mine.length} שאלות שטעיתם בהן, מהקשה לקלה`}</span></div>
-          </div>
-          <p className="trap-tip">שאלה יוצאת מהרשימה רק אחרי שעניתם עליה נכון כמה פעמים, כמספר הטעויות שלכם בה (עד 3).</p>
-          <div className="trap-btns">
-            <button className="btn btn-primary" onClick={() => ui.startLesson({ mode: 'practice', label: 'השאלות שאני נופל בהן', ids: mine.slice(0, 10) })}>תרגול</button>
-            <button className="btn btn-outline" onClick={() => ui.startStudy({ title: 'השאלות שאתם נופלים בהן', groups: [{ ids: mine }], practiceIds: mine })}>רשימה לשינון</button>
-          </div>
-        </section>
-      )}
 
       {TRAPS.map((t) => {
         const k = t.ids.filter(knows).length
@@ -69,7 +54,7 @@ export default function HardView() {
         )
       })}
       <p className="muted" style={{ fontSize: 14, margin: 0 }}>
-        משרד התחבורה לא מפרסם באילו שאלות נכשלים הכי הרבה. הרשימה נבנתה לפי סוגי השאלות שקל לטעות בהם, והחלק העליון לפי הטעויות שלכם.
+        משרד התחבורה לא מפרסם באילו שאלות נכשלים הכי הרבה. הרשימה נבנתה לפי סוגי השאלות שקל לטעות בהם. הטעויות האישיות שלכם נמצאות בלשונית "טעויות".
       </p>
     </>
   )
