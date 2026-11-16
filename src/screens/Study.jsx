@@ -23,7 +23,7 @@ export default function Study({ cfg, onClose }) {
 
   const reveal = (id) => setOpen((o) => new Set(o).add(id))
   const practice = () => {
-    const ids = pickSet(cfg.practiceIds, seen, wrongSet)
+    const ids = pickSet(cfg.practiceIds, seen, wrongSet, cfg.all ? cfg.practiceIds.length : 10)
     onClose()
     ui.startLesson({ mode: 'practice', label: cfg.title, ids, trap: cfg.trap })
   }
