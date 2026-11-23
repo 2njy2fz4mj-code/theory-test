@@ -426,3 +426,43 @@ button.visual.photo{display:block;position:relative;cursor:zoom-in;font:inherit}
 .sheet-sum span{font-size:14px;font-weight:600}
 .trap-head .mode-ico svg{width:28px;height:28px}
 .intro .btn{margin-top:2px}
+
+/* ===== iOS 26+ liquid glass tab bar (only on iPhone, see GlassTabs.jsx) ===== */
+:root{--gt-bg:rgba(255,255,255,.58);--gt-edge:rgba(255,255,255,.75);--gt-line:rgba(20,35,60,.10);--gt-ind:rgba(20,35,60,.075);--gt-lens:rgba(250,252,255,.93);--gt-shadow:rgba(20,35,60,.16)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--gt-bg:rgba(30,40,56,.58);--gt-edge:rgba(255,255,255,.16);--gt-line:rgba(0,0,0,.35);--gt-ind:rgba(255,255,255,.10);--gt-lens:rgba(44,56,76,.95);--gt-shadow:rgba(0,0,0,.45)}}
+:root[data-theme="dark"]{--gt-bg:rgba(30,40,56,.58);--gt-edge:rgba(255,255,255,.16);--gt-line:rgba(0,0,0,.35);--gt-ind:rgba(255,255,255,.10);--gt-lens:rgba(44,56,76,.95);--gt-shadow:rgba(0,0,0,.45)}
+
+/* the content runs under the bar and shows through it */
+.glass-ui .view{padding-bottom:calc(104px + env(safe-area-inset-bottom,0px))}
+.glass-ui #toast{bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+
+.gt{position:fixed;z-index:15;left:0;right:0;margin:0 auto;bottom:calc(8px + env(safe-area-inset-bottom,0px));
+  width:min(calc(100% - 24px),536px);height:64px;border-radius:999px;
+  background:var(--gt-bg);-webkit-backdrop-filter:blur(20px) saturate(185%);backdrop-filter:blur(20px) saturate(185%);
+  box-shadow:inset 0 0 0 1px var(--gt-edge),inset 0 1.5px 0 var(--gt-edge),0 0 0 .5px var(--gt-line),0 10px 28px var(--gt-shadow);
+  touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;
+  transition:transform .35s cubic-bezier(.3,1.4,.5,1)}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.gt{background:var(--surface)}}
+.gt.held{transform:scale(1.035)}
+.gt-row{position:absolute;inset:0;display:flex;padding:0 5px}
+.gt-item{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+  background:none;border:0;padding:0;color:var(--ink);font-family:var(--font-body);font-size:11px;font-weight:600;line-height:1.2;white-space:nowrap}
+.gt-item svg{width:25px;height:25px}
+.gt-item.on{color:var(--blue)}
+.gt-item:focus-visible{outline:3px solid var(--blue);outline-offset:-4px;border-radius:999px}
+.gt-ind{position:absolute;left:0;top:5px;bottom:5px;border-radius:999px;background:var(--gt-ind);
+  transition:transform .42s cubic-bezier(.3,1.25,.5,1),width .42s cubic-bezier(.3,1.25,.5,1),opacity .2s}
+.gt.held .gt-ind,.gt.snap .gt-ind{opacity:0;transition:none}
+
+/* the lens: taller than the bar, white glass, a coloured rim like light bending at the edge */
+.gt-lens{position:absolute;left:0;top:-8px;bottom:-8px;pointer-events:none;opacity:0;transition:opacity .22s}
+.gt.held .gt-lens,.gt.snap .gt-lens{opacity:1;transition:none}
+.gt.snap .gt-lens{transition:transform .3s cubic-bezier(.3,1.3,.5,1)}
+.gt-lens-body{position:absolute;inset:0;border-radius:999px;overflow:hidden;background:var(--gt-lens);
+  transform:scale(.78);transition:transform .22s ease-in;
+  box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.95),inset 0 3px 6px rgba(255,255,255,.85),inset 0 -4px 9px rgba(20,35,60,.10),0 8px 22px rgba(20,35,60,.22)}
+.gt.held .gt-lens-body,.gt.snap .gt-lens-body{transform:scale(1);transition:transform .4s cubic-bezier(.3,1.55,.5,1)}
+.gt-mag{top:8px;bottom:8px;inset-inline:auto;right:auto;height:64px}
+.gt-rim{position:absolute;inset:0;border-radius:999px;pointer-events:none;
+  box-shadow:inset 9px 0 10px -8px rgba(255,70,170,.75),inset -9px 0 10px -8px rgba(40,175,255,.75),inset 0 7px 9px -8px rgba(255,210,60,.6),inset 0 -7px 9px -8px rgba(120,90,255,.55)}
+@media (prefers-reduced-motion: reduce){.gt,.gt *{transition:none!important}}

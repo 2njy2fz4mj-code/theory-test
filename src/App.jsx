@@ -3,6 +3,7 @@ import { useStore } from './lib/store.jsx'
 import { UIProvider, useBack } from './lib/ui.jsx'
 import { sfx } from './lib/fx.js'
 import { IC } from './components/Icons.jsx'
+import GlassTabs, { wantsGlassBar } from './components/GlassTabs.jsx'
 import HomeView from './views/HomeView.jsx'
 import LearnView from './views/LearnView.jsx'
 import HardView from './views/HardView.jsx'
@@ -31,6 +32,9 @@ const NEWS = {
 }
 const NEWS_KEY = 'theory-bekal-news'
 const newsPending = () => { try { return localStorage.getItem(NEWS_KEY) !== NEWS.id } catch { return false } }
+
+const GLASS = wantsGlassBar()
+if (GLASS) document.documentElement.classList.add('glass-ui')
 
 const fromHash = () => {
   const h = location.hash.slice(1)
@@ -108,13 +112,15 @@ export default function App() {
         <main ref={mainRef}>
           <div className="view gut"><View /></div>
         </main>
-        <nav className="tabs gut" aria-label="ניווט">
-          {TABS.map(([k, label, icon]) => (
-            <button key={k} className="tab" aria-current={view === k ? 'page' : undefined} onClick={() => go(k)}>
-              {icon}{label}
-            </button>
-          ))}
-        </nav>
+        {GLASS ? <GlassTabs tabs={TABS} view={view} go={go} /> : (
+          <nav className="tabs gut" aria-label="ניווט">
+            {TABS.map(([k, label, icon]) => (
+              <button key={k} className="tab" aria-current={view === k ? 'page' : undefined} onClick={() => go(k)}>
+                {icon}{label}
+              </button>
+            ))}
+          </nav>
+        )}
       </div>
       {news && (
         <div id="modal">
