@@ -1,5 +1,5 @@
 import { Q, TRAP_IDS, shuffle } from '../lib/data.jsx'
-import { lessonSize, nextLesson, sheetIds } from '../lib/progress.js'
+import { dueCount, lessonSize, nextLesson, sheetIds } from '../lib/progress.js'
 import { dayStr, useStore } from '../lib/store.jsx'
 import { useUI } from '../lib/ui.jsx'
 import { IC } from '../components/Icons.jsx'
@@ -46,6 +46,8 @@ export default function HomeView() {
   const trapKnown = TRAP_IDS.filter((id) => seen.has(id) && !wrongSet.has(id)).length
   const mistakes = new Set([...S.wrong, ...sheetIds(S.sheets)]).size
   const best = S.exams.reduce((m, e) => Math.max(m, e.c), 0)
+  const rounds = S.focus.day === dayStr() ? S.focus.rounds : 0
+  const due = dueCount(S)
 
   const startNext = () => {
     const { u, l } = cur
@@ -70,9 +72,25 @@ export default function HomeView() {
         </div>
       </div>
 
+      <button className="focus-card" onClick={ui.startFocus}>
+        <div className="focus-top">
+          <div>
+            <b>{rounds ? 'עוד 5 שאלות?' : 'רק 5 שאלות'}</b>
+            <span>כ-3 דקות · מקריא לך · אפשר לצאת מתי שרוצים</span>
+          </div>
+          <div className="focus-play">{IC.play}</div>
+        </div>
+        <div className="focus-foot">
+          <div className="fx-today sm">
+            {[0, 1, 2].map((i) => <i key={i} className={i < rounds ? 'on' : ''}>{i < rounds ? IC.check : null}</i>)}
+          </div>
+          <span>{rounds >= 3 ? `${rounds} סבבים היום. עמדת ביעד!` : rounds ? `${rounds} מתוך 3 סבבים היום` : 'היעד: 3 סבבים קצרים ביום'}{due ? ` · ${due} שאלות לחזרה` : ''}</span>
+        </div>
+      </button>
+
       {cur && (
-        <button className="btn btn-green cta" onClick={startNext}>
-          <span>{started ? 'ממשיכים ללמוד' : 'מתחילים ללמוד'}</span>
+        <button className="btn btn-outline cta2" onClick={startNext}>
+          {started ? 'או: שיעור מלא, מאיפה שעצרתם' : 'או: שיעור מלא לפי הסדר'}
           <small>{cur.u.title} · {cur.l.title} · {lessonSize(cur.l)} שאלות</small>
         </button>
       )}

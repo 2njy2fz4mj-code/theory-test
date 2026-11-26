@@ -3,7 +3,7 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState } f
 /* App-wide UI helpers: toast messages, an in-page confirm sheet, and opening lessons / tests / study lists */
 const Ctx = createContext(null)
 
-export function UIProvider({ children, startLesson, startExam, startStudy, openSheet, go }) {
+export function UIProvider({ children, startLesson, startExam, startStudy, openSheet, startFocus, go }) {
   const [toastMsg, setToastMsg] = useState('')
   const [dlg, setDlg] = useState(null)
   const timer = useRef(0)
@@ -17,7 +17,7 @@ export function UIProvider({ children, startLesson, startExam, startStudy, openS
   const cancel = () => { const d = dlg; setDlg(null); d.onCancel?.() }
 
   return (
-    <Ctx.Provider value={{ toast, confirm, startLesson, startExam, startStudy, openSheet, go }}>
+    <Ctx.Provider value={{ toast, confirm, startLesson, startExam, startStudy, openSheet, startFocus, go }}>
       {children}
       {dlg && (
         <div id="modal" onKeyDown={(e) => e.key === 'Escape' && setDlg(null)}>

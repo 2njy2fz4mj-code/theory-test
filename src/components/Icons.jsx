@@ -31,5 +31,6 @@ export const IC = {
   gear: <svg viewBox="0 0 24 24" {...s} strokeWidth="2.1"><circle cx="12" cy="12" r="3.2" /><path d="M12 3v2.5M12 18.500V21M3 12h2.500M18.500 12H21M5.600 5.600l1.800 1.800M16.600 16.600l1.800 1.800M5.600 18.400l1.800-1.800M16.600 7.400l1.800-1.800" /></svg>,
   down: <svg viewBox="0 0 24 24" {...s} strokeWidth="2.8"><path d="M6 9.500l6 6 6-6" /></svg>,
   plus: <svg viewBox="0 0 24 24" {...s} strokeWidth="2.8"><path d="M12 5v14M5 12h14" /></svg>,
+  play: <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z" /></svg>,
   user: <svg viewBox="0 0 24 24" {...s} strokeWidth="2.2"><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5" /></svg>
 }
