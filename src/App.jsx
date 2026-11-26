@@ -14,6 +14,8 @@ import Lesson from './screens/Lesson.jsx'
 import Exam from './screens/Exam.jsx'
 import Study from './screens/Study.jsx'
 import SheetScreen from './screens/SheetScreen.jsx'
+import Focus from './screens/Focus.jsx'
+import { primeSpeech } from './lib/fx.js'
 
 /* Five tabs, one job each: where am I, learn, trap questions, my mistakes, test. Settings sit behind the gear. */
 const TABS = [
@@ -78,6 +80,7 @@ export default function App() {
   const [study, setStudy] = useState(null)
   const [sheet, setSheet] = useState(null)
   const [settings, setSettings] = useState(false)
+  const [focus, setFocus] = useState(null)
   const mainRef = useRef(null)
   const [news, setNews] = useState(newsPending)
   const closeNews = (to) => {
@@ -101,12 +104,13 @@ export default function App() {
   const startLesson = useCallback((cfg) => setLesson({ ...cfg, key: Date.now() }), [])
   const startExam = useCallback((resume) => setExam({ resume: !!resume, key: Date.now() }), [])
   const startStudy = useCallback((cfg) => setStudy({ ...cfg, key: Date.now() }), [])
+  const startFocus = useCallback(() => { primeSpeech(); setFocus(Date.now()) }, [])
   const openSheet = useCallback((id) => setSheet({ id: id || null, key: Date.now() }), [])
 
   const View = TABS.find(([k]) => k === view)[3]
 
   return (
-    <UIProvider startLesson={startLesson} startExam={startExam} startStudy={startStudy} openSheet={openSheet} go={go}>
+    <UIProvider startLesson={startLesson} startExam={startExam} startStudy={startStudy} openSheet={openSheet} startFocus={startFocus} go={go}>
       <div id="app">
         <TopBar onSettings={() => setSettings(true)} />
         <main ref={mainRef}>
@@ -133,6 +137,7 @@ export default function App() {
           </div>
         </div>
       )}
+      {focus && <Focus key={focus} onClose={() => setFocus(null)} />}
       {settings && <Settings onClose={() => setSettings(false)} />}
       {sheet && <SheetScreen key={sheet.key} sheetId={sheet.id} onClose={() => setSheet(null)} />}
       {study && <Study key={study.key} cfg={study} onClose={() => setStudy(null)} />}

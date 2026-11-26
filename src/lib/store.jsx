@@ -6,7 +6,7 @@ import { clearPages } from './sheet.js'
 const KEY = 'theory-bekal-v1'
 const DEF = () => ({
   name: '', xp: 0, streak: 0, lastDay: null, day: null, dayXp: 0, goal: 20,
-  done: {}, wrong: [], seen: [], examDate: '', answered: 0, correct: 0, exams: [], sound: true, miss: {}, theme: 'auto', intro: true, sheets: []
+  done: {}, wrong: [], seen: [], examDate: '', answered: 0, correct: 0, exams: [], sound: true, miss: {}, theme: 'auto', intro: true, sheets: [], srs: {}, focus: { voice: true, day: null, rounds: 0, total: 0 }
 })
 
 export const dayStr = (d = new Date()) =>
@@ -23,6 +23,8 @@ function load() {
   // the first version kept one list for everything
   if (Array.isArray(s.sheet) && s.sheet.length && !s.sheets.length) s.sheets = [{ id: 'old', d: dayStr(), ids: s.sheet.filter((id) => QBY[id]) }]
   delete s.sheet
+  if (!s.srs || typeof s.srs !== 'object') s.srs = {}
+  s.focus = { ...DEF().focus, ...(s.focus || {}) }
   return s
 }
 // start a new day: reset today's XP, break the streak if a day was skipped
@@ -42,7 +44,16 @@ function applyAnswer(s, id, ok) {
   if (!ok) miss[id] = Math.min((miss[id] || 0) + 1, 3)
   else if (miss[id] > 1) miss[id]--
   else delete miss[id]
-  return { ...s, answered: s.answered + 1, correct: s.correct + (ok ? 1 : 0), wrong, seen, miss }
+  // spaced repetition: a question that was missed comes back in 10 minutes, then after 1, 3 and 7 days
+  const srs = { ...s.srs }
+  const now = Date.now()
+  if (!ok) srs[id] = { b: 0, due: now + 10 * 60e3 }
+  else if (srs[id]) {
+    const b = srs[id].b + 1
+    if (b > 3) delete srs[id]
+    else srs[id] = { b, due: now + [0, 1, 3, 7][b] * 864e5 }
+  }
+  return { ...s, answered: s.answered + 1, correct: s.correct + (ok ? 1 : 0), wrong, seen, miss, srs }
 }
 
 /* A test in progress is kept apart, so closing the app in the middle does not lose it */
@@ -102,9 +113,15 @@ export function StoreProvider({ children }) {
     }),
     removeFromSheet: (sid, id) => setS((s) => ({ ...s, sheets: s.sheets.map((x) => (x.id === sid ? { ...x, ids: x.ids.filter((y) => y !== id) } : x)) })),
     deleteSheet: (sid) => setS((s) => ({ ...s, sheets: s.sheets.filter((x) => x.id !== sid) })),
+    focusRound: () => setS((s) => {
+      const t = dayStr()
+      const f = s.focus.day === t ? s.focus : { ...s.focus, day: t, rounds: 0 }
+      return { ...s, focus: { ...f, rounds: f.rounds + 1, total: (f.total || 0) + 1 } }
+    }),
+    setFocusVoice: (voice) => setS((s) => ({ ...s, focus: { ...s.focus, voice } })),
     setTheme: (theme) => setS((s) => ({ ...s, theme })),
     toggleSound: () => setS((s) => ({ ...s, sound: !s.sound })),
-    reset: () => { clearExam(); clearPages(); setS((s) => roll({ ...DEF(), name: s.name, theme: s.theme, sound: s.sound, intro: s.intro })) }
+    reset: () => { clearExam(); clearPages(); setS((s) => roll({ ...DEF(), name: s.name, theme: s.theme, sound: s.sound, intro: s.intro, focus: { ...DEF().focus, voice: s.focus.voice } })) }
   }), [])
 
   const value = useMemo(() => ({ S, act, seen: new Set(S.seen) }), [S, act])

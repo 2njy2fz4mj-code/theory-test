@@ -73,3 +73,33 @@ export function confetti() {
     else c.remove()
   })()
 }
+
+/* Read several pieces in a row, in Hebrew. onFirstDone fires when the first piece has been read. */
+let heVoice
+const pickVoice = () => {
+  try {
+    const v = speechSynthesis.getVoices()
+    heVoice = v.find((x) => /^he/i.test(x.lang) && /enhanced|premium/i.test(x.name)) || v.find((x) => /^he/i.test(x.lang)) || null
+  } catch { heVoice = null }
+}
+try { pickVoice(); speechSynthesis.addEventListener('voiceschanged', pickVoice) } catch { /* no speech */ }
+export const canSpeak = () => { try { return 'speechSynthesis' in window } catch { return false } }
+export function sayAll(parts, onFirstDone) {
+  if (!canSpeak()) return false
+  try {
+    speechSynthesis.cancel()
+    parts.filter(Boolean).forEach((t, i) => {
+      const u = new SpeechSynthesisUtterance(t)
+      u.lang = 'he-IL'
+      u.rate = 0.97
+      if (heVoice) u.voice = heVoice
+      if (i === 0 && onFirstDone) { u.onend = onFirstDone; u.onerror = onFirstDone }
+      speechSynthesis.speak(u)
+    })
+    return true
+  } catch { return false }
+}
+/* iPhone only lets a page talk after a tap: call this inside the tap that opens a reading screen */
+export function primeSpeech() {
+  try { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u) } catch { /* no speech */ }
+}

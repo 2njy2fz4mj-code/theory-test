@@ -466,3 +466,47 @@ button.visual.photo{display:block;position:relative;cursor:zoom-in;font:inherit}
 .gt-rim{position:absolute;inset:0;border-radius:999px;pointer-events:none;
   box-shadow:inset 9px 0 10px -8px rgba(255,70,170,.75),inset -9px 0 10px -8px rgba(40,175,255,.75),inset 0 7px 9px -8px rgba(255,210,60,.6),inset 0 -7px 9px -8px rgba(120,90,255,.55)}
 @media (prefers-reduced-motion: reduce){.gt,.gt *{transition:none!important}}
+
+/* ===== focus mode: five questions, one thing at a time ===== */
+.focus-card{display:flex;flex-direction:column;gap:12px;width:100%;text-align:start;border:0;border-radius:22px;padding:18px 18px 14px;
+  background:linear-gradient(140deg,var(--green) 0%,var(--green-d) 100%);color:#fff;box-shadow:0 5px 0 var(--green-d),0 12px 30px rgba(23,130,54,.25);transition:transform .08s}
+.focus-card:active{transform:translateY(4px);box-shadow:0 1px 0 var(--green-d)}
+.focus-top{display:flex;align-items:center;gap:14px}
+.focus-top > div:first-child{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.focus-top b{font-family:var(--font-display);font-size:27px;line-height:1.1}
+.focus-top span{font-size:15px;opacity:.95}
+.focus-play{flex:none;width:62px;height:62px;border-radius:50%;background:#fff;color:var(--green-d);display:grid;place-items:center;box-shadow:0 4px 0 rgba(0,0,0,.15)}
+.focus-play svg{width:30px;height:30px;margin-inline-start:4px;transform:scaleX(-1)}
+.focus-foot{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;border-top:1.5px solid rgba(255,255,255,.3);padding-top:10px}
+.fx-today{display:flex;gap:8px;justify-content:center}
+.fx-today i{width:34px;height:34px;border-radius:50%;border:3px solid var(--line);display:grid;place-items:center;color:#fff}
+.fx-today i.on{background:var(--green);border-color:var(--green)}
+.fx-today i svg{width:18px;height:18px}
+.fx-today.sm i{width:24px;height:24px;border:2px solid rgba(255,255,255,.55)}
+.fx-today.sm i.on{background:#fff;border-color:#fff;color:var(--green-d)}
+.fx-today.sm i svg{width:14px;height:14px}
+.btn.cta2{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:16px;padding-block:11px}
+.btn.cta2 small{font-family:var(--font-body);font-weight:500;font-size:13px;color:var(--muted)}
+
+.fx .fx-top{display:flex;align-items:center;gap:12px;padding-block:14px 6px}
+.fx-dots{flex:1;display:flex;justify-content:center;gap:10px}
+.fx-dots i{width:16px;height:16px;border-radius:50%;background:var(--line);transition:background .3s,transform .3s}
+.fx-dots i.on{background:var(--green);transform:scale(1.15)}
+.fx-voice{display:flex;align-items:center;gap:5px;border:2px solid var(--line);background:var(--surface);border-radius:99px;padding:5px 11px;font-size:13px;font-weight:700;color:var(--muted)}
+.fx-voice svg{width:18px;height:18px}
+.fx-voice.on{border-color:var(--blue);color:var(--blue);background:var(--blue-bg)}
+.fx-body{gap:20px;padding-top:14px;animation:fx-in .3s ease-out}
+@keyframes fx-in{from{opacity:0;transform:translateY(12px)}}
+.fx-q{font-family:var(--font-body);font-weight:800;font-size:27px;line-height:1.45;letter-spacing:.005em}
+.fx-wait{position:relative;overflow:hidden;width:100%;border:2px dashed var(--line);background:var(--surface-2);border-radius:18px;padding:22px 16px;color:var(--muted);font-weight:600;font-size:16px}
+.fx-wait-bar{position:absolute;left:0;bottom:0;height:5px;background:var(--blue);width:0;animation:fx-fill linear forwards}
+@keyframes fx-fill{to{width:100%}}
+.fx-opts{animation:fx-in .25s ease-out}
+.fx-opts .opt{font-size:20px;padding:18px 16px;line-height:1.4}
+.opt.dim{opacity:.45}
+.fx-why{font-size:17px!important;line-height:1.5}
+.btn.fx-big{font-size:21px;padding-block:18px}
+.fx-center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center}
+.fx-center h1{font-size:34px;color:var(--green)}
+.fx-center p{margin:0;font-size:18px;max-width:340px;line-height:1.5}
+.fx-clock{font-family:var(--font-display);font-weight:700;font-size:64px;font-variant-numeric:tabular-nums;color:var(--blue)}
